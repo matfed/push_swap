@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <assert.h>
-#include "push_swap.h"
+#include "stack.h"
 
 void test_make_stack() {
     t_stack stack;
