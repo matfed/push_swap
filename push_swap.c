@@ -85,6 +85,14 @@ int is_empty(t_stack *stack)
     return (stack->start == stack->end);
 }
 
+void swap(t_stack *stack)
+{
+    int v1 = pop(stack);
+    int v2 = pop(stack);
+    push(stack, v1);
+    push(stack, v2);
+}
+
 void debug_stack(t_stack *stack)
 {
     for (int i = stack->start; i != stack->end; i = (i + 1) % stack->max_size) {

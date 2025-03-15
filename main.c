@@ -32,16 +32,27 @@ void load_greater_part_of_top_b_segment_to_a(
     t_stack *a, t_stack *b, t_stack *a_segments, t_stack *b_segments) {
     int iters = pop(b_segments);
 
-    if (iters == -1) {
-        rrot(b);
-        output("rrb\n");
-        iters = 1;
+    if (iters < 0 && iters >= -2) {
+        iters = -iters;
+        for (int i = 0; i < iters; i++) {
+            rrot(b);
+            output("rrb\n");
+        }
     }
 
     if (iters == 1) {
         push(a, pop(b));
         output("pa\n");
         push(a_segments, 1);
+        return;
+    }
+
+    if (iters == 2) {
+        push(a, pop(b));
+        output("pa\n");
+        push(a, pop(b));
+        output("pa\n");
+        push(a_segments, 2);
         return;
     }
     int backwards = 0;
@@ -85,12 +96,24 @@ void load_lesser_parts_of_top_a_segment_to_b(
     t_stack *a, t_stack *b, t_stack *a_segments, t_stack *b_segments) {
     while(1) {
         int iters = pop(a_segments);
-        if (iters == -1) {
-            rrot(a);
-            output("rra\n");
-            iters = 1;
+
+        if (iters < 0 && iters >= -2) {
+            iters = -iters;
+            for (int i = 0; i < iters; i++) {
+                rrot(a);
+                output("rra\n");
+            }
         }
+
         if (iters == 1) {
+            push(a_segments, iters);
+            break;
+        }
+        if (iters == 2) {
+            if (seek_offset(a, 0) > seek_offset(a, 1)) {
+                swap(a);
+                output("sa\n");
+            }
             push(a_segments, iters);
             break;
         }
