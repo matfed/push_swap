@@ -32,7 +32,7 @@ void load_greater_part_of_top_b_segment_to_a(
     t_stack *a, t_stack *b, t_stack *a_segments, t_stack *b_segments) {
     int iters = pop(b_segments);
 
-    if (iters < 0 && iters >= -2) {
+    if (iters < 0 && iters >= -3) {
         iters = -iters;
         for (int i = 0; i < iters; i++) {
             rrot(b);
@@ -40,21 +40,15 @@ void load_greater_part_of_top_b_segment_to_a(
         }
     }
 
-    if (iters == 1) {
-        push(a, pop(b));
-        output("pa\n");
-        push(a_segments, 1);
+    if (iters >= 0 && iters <= 3) {
+        for (int i = 0; i < iters; i++) {
+            push(a, pop(b));
+            output("pa\n");
+        }
+        push(a_segments, iters);
         return;
     }
 
-    if (iters == 2) {
-        push(a, pop(b));
-        output("pa\n");
-        push(a, pop(b));
-        output("pa\n");
-        push(a_segments, 2);
-        return;
-    }
     int backwards = 0;
     if (iters < 0) {
         iters = -iters;
@@ -97,7 +91,7 @@ void load_lesser_parts_of_top_a_segment_to_b(
     while(1) {
         int iters = pop(a_segments);
 
-        if (iters < 0 && iters >= -2) {
+        if (iters < 0 && iters >= -3) {
             iters = -iters;
             for (int i = 0; i < iters; i++) {
                 rrot(a);
@@ -114,6 +108,27 @@ void load_lesser_parts_of_top_a_segment_to_b(
                 swap(a);
                 output("sa\n");
             }
+            push(a_segments, iters);
+            break;
+        }
+        if (iters == 3) {
+            if (seek_offset(a, 1) < seek_offset(a, 0)) {
+                swap(a);
+                output("sa\n");
+            }
+            if (seek_offset(a, 2) < seek_offset(a, 1)) {
+                rot(a);
+                output("ra\n");
+                swap(a);
+                output("sa\n");
+                rrot(a);
+                output("rra\n");
+            }
+            if (seek_offset(a, 1) < seek_offset(a, 0)) {
+                swap(a);
+                output("sa\n");
+            }
+
             push(a_segments, iters);
             break;
         }
