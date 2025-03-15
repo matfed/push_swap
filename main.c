@@ -52,7 +52,9 @@ void load_greater_part_of_top_b_segment_to_a(
     int backwards = 0;
     if (iters < 0) {
         iters = -iters;
-        backwards = 1;
+        if (!is_empty(b_segments)) {
+            backwards = 1;
+        }
     }
 
     int pivot = find_pivot(b, iters, backwards);

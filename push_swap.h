@@ -29,7 +29,7 @@ void debug_stack(t_stack *stack);
 # define debug(...)
 # endif
 
-# ifndef DEBUG
+# ifdef OUTPUT
 # define output(...) printf(__VA_ARGS__)
 # else
 # define output(...)
