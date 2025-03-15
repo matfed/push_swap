@@ -19,6 +19,7 @@ void rot(t_stack *stack);
 void rrot(t_stack *stack);
 int seek(t_stack *stack);
 int seek_offset(t_stack *stack, int offset);
+int size(t_stack *stack);
 int is_empty(t_stack *stack);
 void swap(t_stack *stack);
 void debug_stack(t_stack *stack);

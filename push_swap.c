@@ -80,9 +80,16 @@ void rrot(t_stack *stack)
     push(stack, tmp);
 }
 
-int is_empty(t_stack *stack)
-{
+int is_empty(t_stack *stack) {
     return (stack->start == stack->end);
+}
+
+int size(t_stack *stack) {
+    if (stack->end >= stack->start) {
+        return (stack->end - stack->start);
+    } else {
+        return (stack->max_size - stack->start + stack->end);
+    }
 }
 
 void swap(t_stack *stack)
