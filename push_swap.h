@@ -28,4 +28,10 @@ void debug_stack(t_stack *stack);
 # define debug(...)
 # endif
 
+# ifndef DEBUG
+# define output(...) printf(__VA_ARGS__)
+# else
+# define output(...)
+# endif
+
 # endif // PUSH_SWAP_H

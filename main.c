@@ -2,52 +2,6 @@
 #include <stdlib.h>
 #include "push_swap.h"
 
-void load_greater_part_of_top_b_segment_to_a(
-    t_stack *a, t_stack *b, t_stack *a_segments, t_stack *b_segments) {
-    int pivot = seek(b);
-    debug("pivot = %d\n", pivot);
-        
-    int iters = pop(b_segments);
-
-    if (iters == -1) {
-        rrot(b);
-        iters = 1;
-    }
-
-    if (iters == 1) {
-        push(a, pop(b));
-        push(a_segments, 1);
-        return;
-    }
-    int backwards = 0;
-    if (iters < 0) {
-        iters = -iters;
-        backwards = 1;
-    }
-    int new_segment_a = 0;
-    int new_segment_b = 0;
-    for (int i = 0; i < iters; i++) {
-        if (backwards) {
-            rrot(b);
-        }
-        if (seek(b) >= pivot) {
-            push(a, pop(b));
-            new_segment_a++;
-        } else {
-            if (!backwards)
-                rot(b);
-            new_segment_b++;
-        }
-    }
-    if (new_segment_a > 0)
-        push(a_segments, new_segment_a);
-    if (new_segment_b > 0) {
-        if (!backwards)
-            new_segment_b = -new_segment_b;
-        push(b_segments, new_segment_b);
-    }
-}
-
 void insertion_sort(int *arr, int n) {
     for (int i = 1; i < n; i++) {
         int key = arr[i];
@@ -74,12 +28,66 @@ int find_pivot(t_stack *a, int iters, int backwards) {
     return pivot;
 }
 
+void load_greater_part_of_top_b_segment_to_a(
+    t_stack *a, t_stack *b, t_stack *a_segments, t_stack *b_segments) {
+    int iters = pop(b_segments);
+
+    if (iters == -1) {
+        rrot(b);
+        output("rrb\n");
+        iters = 1;
+    }
+
+    if (iters == 1) {
+        push(a, pop(b));
+        output("pa\n");
+        push(a_segments, 1);
+        return;
+    }
+    int backwards = 0;
+    if (iters < 0) {
+        iters = -iters;
+        backwards = 1;
+    }
+
+    int pivot = find_pivot(b, iters, backwards);
+    debug("pivot = %d\n", pivot);
+
+    int new_segment_a = 0;
+    int new_segment_b = 0;
+    for (int i = 0; i < iters; i++) {
+        if (backwards) {
+            rrot(b);
+            output("rrb\n");
+        }
+        if (seek(b) >= pivot) {
+            push(a, pop(b));
+            output("pa\n");
+            new_segment_a++;
+        } else {
+            if (!backwards) {
+                output("rb\n");
+                rot(b);
+            }
+            new_segment_b++;
+        }
+    }
+    if (new_segment_a > 0)
+        push(a_segments, new_segment_a);
+    if (new_segment_b > 0) {
+        if (!backwards)
+            new_segment_b = -new_segment_b;
+        push(b_segments, new_segment_b);
+    }
+}
+
 void load_lesser_parts_of_top_a_segment_to_b(
     t_stack *a, t_stack *b, t_stack *a_segments, t_stack *b_segments) {
     while(1) {
         int iters = pop(a_segments);
         if (iters == -1) {
             rrot(a);
+            output("rra\n");
             iters = 1;
         }
         if (iters == 1) {
@@ -102,13 +110,17 @@ void load_lesser_parts_of_top_a_segment_to_b(
         for (int i = 0; i < iters; i++) {
             if (backwards) {
                 rrot(a);
+                output("rra\n");
             }
             if (seek(a) < pivot) {
                 push(b, pop(a));
+                output("pb\n");
                 new_segment_b++;
             } else {
-                if (!backwards)
+                if (!backwards) {
                     rot(a);
+                    output("ra\n");
+                }
                 new_segment_a++;
             }
         }
@@ -122,18 +134,6 @@ void load_lesser_parts_of_top_a_segment_to_b(
             push(b_segments, new_segment_b);
         if (new_segment_a == 0) 
             break;
-        int new_pivot;
-        for (int i = 0; i < new_segment_a; i++) {
-            new_pivot = seek_offset(a, i);
-            if (new_pivot != pivot) {
-                break;
-            }
-        }
-        if (new_pivot != pivot) {
-            pivot = new_pivot;
-        } else {
-            break;
-        }
     }  
 }
 
@@ -153,7 +153,7 @@ int main(int argc, char *argv[]) {
     t_stack b_segments;
     make_stack(&b_segments, MAX_SIZE);
 
-    for (int i = 1; i < argc; i++) {
+    for (int i = argc - 1; i > 0; i--) {
         push(&a, atoi(argv[i]));
     }
     push(&a_segments, argc - 1);

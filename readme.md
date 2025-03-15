@@ -9,5 +9,5 @@ gcc main.c push_swap.c -DDEBUG -o push_swap
 ARG=$(shuf -i 1-100 | tr '\n' ' '); ./push_swap $ARG | wc -l
 
 
-ARG=$(shuf -i 1-500 | tr '\n' ' '); ./push_swap $ARG | ./checker_Mac $ARG
+ARG=$(shuf -i 1-5 | tr '\n' ' '); ./push_swap $ARG | ./checker_Mac $ARG
 ```
