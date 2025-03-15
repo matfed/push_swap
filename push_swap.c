@@ -1,109 +1,119 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "push_swap.h"
+#include "util.h"
 
-void make_stack(t_stack *stack, int max_size)
-{
-    stack->stack = (int *)malloc(sizeof(int) * max_size);
-    stack->max_size = max_size;
-    stack->start = 0;
-    stack->end = 0;
-}
-
-void clear_stack(t_stack *stack)
-{
-    free(stack->stack);
-    stack->max_size = 0;
-    stack->start = 0;
-    stack->end = 0;
-}
-
-void push(t_stack *stack, int value)
-{
-    stack->stack[stack->end] = value;
-    stack->end = (stack->end + 1) % stack->max_size;
-    if (stack->end == stack->start) {
-        debug("Error: stack is full\n");
-        exit(1);
+int median(t_stack *a) {
+    int tmp[MAX_STACK_SIZE];
+    int stack_size = size(a);
+    for (int i = 0; i < stack_size; i++) {
+        tmp[i] = seek_offset(a, i);
     }
+    insertion_sort(tmp, stack_size);
+    int pivot = tmp[stack_size / 2];
+    return pivot;
 }
 
-int pop(t_stack *stack)
-{
-    if (stack->start == stack->end) {
-        debug("Error: stack is empty\n");
-        exit(1);
+int find_min_val_offset(t_stack *st) {
+    int min_val = seek(st);
+    int min_val_offset = 0;
+    for (int i = 0; i < size(st); i++) {
+        int val = seek_offset(st, i);
+        if (val < min_val) {
+            min_val = val;
+            min_val_offset = i;
+        }
     }
+    return min_val_offset;
+}
+
+int aligmnent_cost(t_stack *a, t_stack *b, int offset, int execute) {
+    int v = seek_offset(b, offset);
+    int remove_cost = offset;
+    int rremove_cost = size(b) - offset;
     
-    stack->end = stack->end - 1;
-    if (stack->end < 0)
-        stack->end = stack->max_size - 1;
-    return (stack->stack[stack->end]);
-}
+    int min_val_offset = find_min_val_offset(a);
+    int a_offset = 0;
+    int i;
+    for (i = 0; i < size(a); i++) {
+        a_offset = (i + min_val_offset) % size(a);
+        if (seek_offset(a, a_offset) > v) {
+            break;
+        }
+    }
+    a_offset = (i + min_val_offset) % size(a);
 
-int seek(t_stack *stack)
-{
-    int end = stack->end - 1;
-    if (end < 0)
-        end = stack->max_size - 1;
-    return (stack->stack[end]);
-}
-
-int seek_offset(t_stack *stack, int offset)
-{
-    if (offset >= 0) {
-        int end = stack->end - 1 - offset;
-        if (end < 0)
-            end = stack->max_size + end;
-        return (stack->stack[end]);
+    int insert_cost = a_offset;
+    int rinsert_cost = size(a) - a_offset;
+    debug("offset = %d\n", offset);
+    debug("remove_cost = %d\n", remove_cost);
+    debug("rremove_cost = %d\n", rremove_cost);
+    debug("a_offset = %d\n", a_offset);
+    debug("insert_cost = %d\n", insert_cost);
+    debug("rinsert_cost = %d\n", rinsert_cost);
+    debug("----\n");
+    int r_cost = max(insert_cost, remove_cost);
+    int rr_cost = max(rinsert_cost, rremove_cost);
+    int mixed_cost = min(insert_cost, rinsert_cost) + min(remove_cost, rremove_cost);
+    if (mixed_cost < r_cost && mixed_cost < rr_cost) {
+        if (execute) {
+            if (insert_cost < rinsert_cost) {
+                for (int i = 0; i < insert_cost; i++) {
+                    rot(a);
+                    output("ra\n");
+                }
+            } else {
+                for (int i = 0; i < rinsert_cost; i++) {
+                    rrot(a);
+                    output("rra\n");
+                }
+            }
+            if (remove_cost < rremove_cost) {
+                for (int i = 0; i < remove_cost; i++) {
+                    rot(b);
+                    output("rb\n");
+                }
+            } else {
+                for (int i = 0; i < rremove_cost; i++) {
+                    rrot(b);
+                    output("rrb\n");
+                }
+            }
+        }
+        return mixed_cost;
+    } else if (r_cost < rr_cost) {
+        if (execute) {
+            for (int i = 0; i < min(insert_cost, remove_cost); i++) {
+                rot(a);
+                rot(b);
+                output("rr\n");
+            }
+            for (int i = 0; i < max(0, remove_cost - insert_cost); i++) {
+                rot(b);
+                output("rb\n");
+            }
+            for (int i = 0; i < max(0,  insert_cost - remove_cost); i++) {
+                rot(a);
+                output("ra\n");
+            }
+        }
+        return r_cost;
     } else {
-        int start = stack->start + offset - 1;
-        if (start >= stack->max_size)
-            start = start - stack->max_size;
-        return (stack->stack[start]);
+        if (execute) {
+            for (int i = 0; i < min(rinsert_cost, rremove_cost); i++) {
+                rrot(a);
+                rrot(b);
+                output("rrr\n");
+            }
+            for (int i = 0; i < max(0, rremove_cost - rinsert_cost); i++) {
+                rrot(b);
+                output("rrb\n");
+            }
+            for (int i = 0; i < max(0,  rinsert_cost - rremove_cost); i++) {
+                rrot(a);
+                output("rra\n");
+            }
+        }
+        return rr_cost;
     }
-}
-
-void rot(t_stack *stack)
-{
-    int tmp = pop(stack);
-    stack->start = stack->start - 1;
-    if (stack->start < 0)
-        stack->start = stack->max_size - 1;
-    stack->stack[stack->start] = tmp;
-}
-
-void rrot(t_stack *stack)
-{
-    int tmp = stack->stack[stack->start];
-    stack->start = (stack->start + 1) % stack->max_size;
-    push(stack, tmp);
-}
-
-int is_empty(t_stack *stack) {
-    return (stack->start == stack->end);
-}
-
-int size(t_stack *stack) {
-    if (stack->end >= stack->start) {
-        return (stack->end - stack->start);
-    } else {
-        return (stack->max_size - stack->start + stack->end);
-    }
-}
-
-void swap(t_stack *stack)
-{
-    int v1 = pop(stack);
-    int v2 = pop(stack);
-    push(stack, v1);
-    push(stack, v2);
-}
-
-void debug_stack(t_stack *stack)
-{
-    for (int i = stack->start; i != stack->end; i = (i + 1) % stack->max_size) {
-        debug("%d ", stack->stack[i]);
-    }
-    debug("\n");
 }
